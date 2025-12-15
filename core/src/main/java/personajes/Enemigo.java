@@ -17,7 +17,7 @@ public class Enemigo {
     private float anchoHitbox = 48;
     private float altoHitbox = 48;
     private int daño = 10;
-    private int cooldown = 1;
+    private int cooldown = 3; // ✅ Cambiado de 1 a 3 segundos
     private float tiempoTranscurrido = 0;
     private NivelBase nivel;
     private float alcanceAtaque = 0.15f;
@@ -77,26 +77,6 @@ public class Enemigo {
     }
 
     public void act(float delta) {
-        // ✅ DEBUG temporal - Verificar distancias
-        if (jugador1 != null && jugador1.getCuerpo() != null &&
-            jugador2 != null && jugador2.getCuerpo() != null) {
-
-            float distJ1 = Vector2.dst(
-                this.cuerpo.getPosition().x, this.cuerpo.getPosition().y,
-                jugador1.getCuerpo().getPosition().x,
-                jugador1.getCuerpo().getPosition().y
-            );
-            float distJ2 = Vector2.dst(
-                this.cuerpo.getPosition().x, this.cuerpo.getPosition().y,
-                jugador2.getCuerpo().getPosition().x,
-                jugador2.getCuerpo().getPosition().y
-            );
-
-            if (distJ1 < 1f || distJ2 < 1f) {
-               // vacio
-            }
-        }
-
         // Calcular y moverse hacia el jugador más cercano
         Jugador objetivo = calcularJugadorObjetivo();
         if (objetivo != null) {
@@ -155,7 +135,7 @@ public class Enemigo {
                             hiloServidor.enviarMensajeATodos(mensaje);
 
                             System.out.println("💥 [SERVIDOR] Enemigo " + this.ID + " dañó a Jugador " +
-                                jugador.getIdJugador() + " → Vida: " + nuevaVida + " (Mensaje: " + mensaje + ")");
+                                jugador.getIdJugador() + " → Vida: " + nuevaVida);
                         }
 
                         this.encontroJugador = true;
@@ -215,6 +195,11 @@ public class Enemigo {
         return this.cuerpo.getPosition().y;
     }
 
+    // ✅ NUEVO: Método getter para vida
+    public int getVida() {
+        return this.vida;
+    }
+
     public void dispose() {
         // No hay textura que limpiar en servidor
     }
@@ -225,7 +210,8 @@ public class Enemigo {
         Vector2 posicionJugador = objetivo.getCuerpo().getPosition();
         Vector2 posicionEnemigo = cuerpo.getPosition();
 
-        Vector2 direccion = posicionJugador.cpy().sub(posicionEnemigo).nor().scl(1.5f);
+        // ✅ Velocidad reducida de 1.5 a 1.0 (más lento que los jugadores)
+        Vector2 direccion = posicionJugador.cpy().sub(posicionEnemigo).nor().scl(1.0f);
         cuerpo.setLinearVelocity(direccion.x, cuerpo.getLinearVelocity().y);
     }
 

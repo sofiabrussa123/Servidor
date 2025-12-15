@@ -8,7 +8,6 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 
 import Red.HiloServidor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import niveles.NivelBase;
 import niveles.entorno.BarraInventario;
 import personajes.accesorios.MejoraTemporal;
@@ -193,7 +192,8 @@ public class Jugador {
         }
     }
 
-    public void atacar(World mundo, boolean friendlyFire) {
+    // ✅ CORREGIDO: Ahora recibe HiloServidor como parámetro
+    public void atacar(World mundo, boolean friendlyFire, HiloServidor hiloServidor) {
         if (puedeAtacar) {
             atacando = true;
             puedeAtacar = false;
@@ -220,18 +220,30 @@ public class Jugador {
 
                 if (userData instanceof Enemigo) {
                     Enemigo enemigo = (Enemigo) userData;
+                    int vidaAntes = enemigo.getVida();
                     enemigo.recibirDaño(dañoActual);
+                    int vidaDespues = enemigo.getVida();
 
                     if (hiloServidor != null) {
                         hiloServidor.enviarMensajeATodos("Enemigo:" + enemigo.getID() + ":RecibirDaño:" + dañoActual);
+                        System.out.println("⚔️ [SERVIDOR] J" + this.idJugador + " atacó enemigo " + enemigo.getID() +
+                            " (" + vidaAntes + " → " + vidaDespues + " HP)");
                     }
                     return false;
                 }
 
+                // ✅ Friendly Fire - AHORA SÍ FUNCIONA
                 if (friendlyFire && userData instanceof Jugador && userData != this) {
                     Jugador otroJugador = (Jugador) userData;
+                    int vidaAntes = otroJugador.getVida();
                     otroJugador.recibirDaño(dañoActual);
-                    System.out.println("⚔️ Jugador " + this.idJugador + " atacó a Jugador " + otroJugador.getIdJugador());
+                    int vidaDespues = otroJugador.getVida();
+
+                    if (hiloServidor != null) {
+                        hiloServidor.enviarMensajeATodos("Jugador:" + otroJugador.getIdJugador() + ":Dañar:" + vidaDespues);
+                        System.out.println("⚔️ [SERVIDOR] J" + this.idJugador + " golpeó a J" + otroJugador.getIdJugador() +
+                            " (" + vidaAntes + " → " + vidaDespues + " HP) - Daño: " + dañoActual);
+                    }
                     return false;
                 }
 
@@ -273,9 +285,8 @@ public class Jugador {
         enElAire = valor;
     }
 
-
     public BarraInventario getBarraInventario() {
-        return this.barraInventario; // Puede ser null en servidor
+        return this.barraInventario;
     }
 
     public float getAlto(){

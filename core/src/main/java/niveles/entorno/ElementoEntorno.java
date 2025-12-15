@@ -54,7 +54,7 @@ public abstract class ElementoEntorno {
         PolygonShape forma = new PolygonShape();
         forma.setAsBox(
             ancho / 2 / Principal.PPM,
-            (alto / 2 - 2) / Principal.PPM
+            alto / 2 / Principal.PPM
         );
 
         fixtureDef.shape = forma;

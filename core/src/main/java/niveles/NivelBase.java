@@ -103,11 +103,13 @@ public abstract class NivelBase implements Screen, GameController {
                     (b instanceof Jugador && a instanceof PuertaLlegada)) {
 
                     PuertaLlegada puerta = (a instanceof PuertaLlegada) ? (PuertaLlegada) a : (PuertaLlegada) b;
+
                     if (puerta.sePuedeCruzar()) {
+                        System.out.println("🏆 [SERVIDOR] Puerta cruzada - Notificando clientes");
+
                         if (hiloServidor != null) {
                             hiloServidor.enviarMensajeATodos("CambiarPantalla:PantallaGanaste");
                         }
-                        System.out.println("🏆 ¡Nivel completado!");
                     }
                 }
 
@@ -357,7 +359,10 @@ public abstract class NivelBase implements Screen, GameController {
     public void atacar(int idJugador) {
         Jugador jugador = (idJugador == 1) ? this.jugador1 : this.jugador2;
         if (jugador != null) {
-            jugador.atacar(this.mundo, this.friendlyFire);
+            // ✅ AHORA SÍ pasa hiloServidor
+            jugador.atacar(this.mundo, this.friendlyFire, this.hiloServidor);
+            System.out.println("⚔️ [SERVIDOR] Procesando ataque de J" + idJugador +
+                " (FriendlyFire: " + this.friendlyFire + ")");
         }
     }
 
